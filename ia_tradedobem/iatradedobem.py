@@ -22,6 +22,8 @@ def meu_tradedobem (lista_de_acoes):
     hoje = date.today()
     dict_acoes = {}
 
+    print("INICIO...", end="")
+
     for acao in lista_de_acoes:
         df = web.DataReader(acao, "yahoo", hoje - pd.DateOffset(months=3), hoje)
         df = df.iloc[::-1] # inverter o dataframe para que o primeiro dia seja o mais recente
@@ -37,25 +39,15 @@ def meu_tradedobem (lista_de_acoes):
             percentual = (valor_acao_agora - media) / valor_acao_agora * 100
             percentual = float("{:.5f}".format(percentual))
             lista_percentual.append(percentual)
+            print(".", end="")
 
         dict_acoes[acao] = sum(lista_percentual)
 
-        # print(f"lista de medias: {lista_medias}")
-        # print(f"lista de variacoes: {lista_percentual}")
-
-        # plt.plot(lista_percentual)
-        # plt.plot(lista_medias)
-        # plt.show()
-        print(f"\n\n{acao} ok. soma: {sum(lista_percentual)}")
-        print(dict_acoes)
-
+        print(f"{acao} ok...", end="")
     
-    # ordenar o dict_acoes em ordem crescente de sum(lista_percentual)
     dict_acoes = sorted(dict_acoes.items(), key=lambda x: x[1])
+    # dict_acoes = sorted(dict_acoes, key=dict_acoes.get)
     print(f"\n\nDict acoes ordenado: {dict_acoes}")
-    # dict_acoes = sorted(dict_acoes.items(), key=lambda x: x[1], reverse=True)
-    # dict_acoes = sorted(dict_acoes.items())
-    # print(dict_acoes)
 
 
 if __name__ == "__main__":
