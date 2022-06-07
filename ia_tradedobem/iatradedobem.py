@@ -14,35 +14,49 @@ import pandas_datareader.data as web
 from datetime import date, timedelta
 import matplotlib.pyplot as plt
 
-hoje = date.today()
-
 lista_de_acoes = ["ABEV3.SA", "ARZZ3.SA", "B3SA3.SA", "BBDC3.SA", "BBSE3.SA", "EGIE3.SA", "ENBR3.SA", "EZTC3.SA", "GRND3.SA", "ITSA3.SA", "ITUB3.SA", "LEVE3.SA", "LREN3.SA", "MDIA3.SA", "ODPV3.SA", "PSSA3.SA", "RADL3.SA", "SLCE3.SA", "TOTS3.SA", "VIVT3.SA", "VULC3.SA", "WEGE3.SA"]
 
-for acao in lista_de_acoes:
-    df = web.DataReader(acao, "yahoo", hoje - pd.DateOffset(months=3), hoje)
-    df = df.iloc[::-1] # inverter o dataframe para que o primeiro dia seja o mais recente
-    # df.to_excel("dados.xlsx", sheet_name=acao)
 
-    lista_medias = []
-    for i in range(0, 90, 5):   # calcular a média até 90 dias para trás
-        media = df.loc[hoje-timedelta(i):hoje-timedelta(i+5), "Adj Close"].mean()
-        lista_medias.append(media)
-
-    media = 0
-    lista_variacao = []
-    for media_anterior in lista_medias:
-        if media == 0:
-            media = media_anterior
-        else:
-            variacao = (media - media_anterior) / media_anterior * 100
-            # formatar a variacao para float com 5 casas decimais
-            variacao = float("{:.5f}".format(variacao))
-            lista_variacao.append(variacao)
-            media = media_anterior
+def meu_tradedobem (lista_de_acoes):
     
-    print(f"lista de medias: {lista_medias}")
-    print(f"lista de variacoes: {lista_variacao}")
+    hoje = date.today()
+    dict_acoes = {}
 
-    plt.plot(lista_variacao)
-    plt.plot(lista_medias)
-    plt.show()
+    for acao in lista_de_acoes:
+        df = web.DataReader(acao, "yahoo", hoje - pd.DateOffset(months=3), hoje)
+        df = df.iloc[::-1] # inverter o dataframe para que o primeiro dia seja o mais recente
+        # df.to_excel("dados.xlsx", sheet_name=acao)
+
+        lista_medias = []
+        lista_percentual = []
+        valor_acao_agora = df.loc[hoje.strftime("%m/%d/%Y"), "Adj Close"].item()
+
+        for i in range(0, 90, 5):   # calcular a média até 90 dias para trás de 5 em 5 dias
+            media = df.loc[hoje-timedelta(i):hoje-timedelta(i+5), "Adj Close"].mean()
+            lista_medias.append(media)
+            percentual = (valor_acao_agora - media) / valor_acao_agora * 100
+            percentual = float("{:.5f}".format(percentual))
+            lista_percentual.append(percentual)
+
+        dict_acoes[acao] = sum(lista_percentual)
+
+        # print(f"lista de medias: {lista_medias}")
+        # print(f"lista de variacoes: {lista_percentual}")
+
+        # plt.plot(lista_percentual)
+        # plt.plot(lista_medias)
+        # plt.show()
+        print(f"\n\n{acao} ok. soma: {sum(lista_percentual)}")
+        print(dict_acoes)
+
+    
+    # ordenar o dict_acoes em ordem crescente de sum(lista_percentual)
+    dict_acoes = sorted(dict_acoes.items(), key=lambda x: x[1])
+    print(f"\n\nDict acoes ordenado: {dict_acoes}")
+    # dict_acoes = sorted(dict_acoes.items(), key=lambda x: x[1], reverse=True)
+    # dict_acoes = sorted(dict_acoes.items())
+    # print(dict_acoes)
+
+
+if __name__ == "__main__":
+    meu_tradedobem(lista_de_acoes)
