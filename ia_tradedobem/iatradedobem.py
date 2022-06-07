@@ -43,11 +43,11 @@ def meu_tradedobem (lista_de_acoes):
 
         dict_acoes[acao] = sum(lista_percentual)
 
-        print(f"{acao} ok...", end="")
+        print(f"{acao} ok.", end="")
     
-    dict_acoes = sorted(dict_acoes.items(), key=lambda x: x[1])
-    # dict_acoes = sorted(dict_acoes, key=dict_acoes.get)
-    print(f"\n\nDict acoes ordenado: {dict_acoes}")
+    # dict_acoes = sorted(dict_acoes.items(), key=lambda x: x[1])
+    dict_acoes = sorted(dict_acoes, key=dict_acoes.get)
+    print(f"\n\nMEU TRADE DO BEM: {dict_acoes}")
 
 
 if __name__ == "__main__":
