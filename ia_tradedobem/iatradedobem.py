@@ -69,7 +69,7 @@ def ia_tradedobem (lista_de_acoes):
     # criar uma lista de ações com minhas últimas ações compradas para trade com ação e data da compra
     # criar um histórico dos últimos 3 meses desta ação em percentual
     # criar uma nova coluna no data frame da análise da ação com uma coluna decisão indicando compra (= 1) ou não compra (= 0)
-    # criar um histórico dos últimos 3 meses das demais ações e na coluna decisão indicando não compra
+    # criar um histórico dos últimos 3 meses das demais ações e na coluna decisão indicando não compra (0)
     # rodar o modelo dummy no data frame da análise da ação
     # rodar os demais modelos no data frame da análise da ação
 
@@ -77,7 +77,7 @@ def ia_tradedobem (lista_de_acoes):
 
     df = pd.DataFrame()
     df_todos = pd.DataFrame()
-    trades_feitos = pd.read_excel("trades.xlsx")
+    trades_feitos = pd.read_excel("tradesmenor.xlsx")
     for trade in trades_feitos.itertuples():
         acao = trade.AÇÃO
         acao = acao + ".SA"
@@ -92,13 +92,17 @@ def ia_tradedobem (lista_de_acoes):
                 df_todos = df_todos.append(df)
         print(df_todos)
 
-    df_todos.to_excel("dados.xlsx",sheet_name="dados")
+    #tratar df_todos
+    df_todos = df_todos.dropna("columns")
+    df_todos.to_excel("dados.xlsx",sheet_name="dados", index=False)
 
 
 
 if __name__ == "__main__":
     
-    lista_de_acoes = ["ABEV3.SA", "ARZZ3.SA", "B3SA3.SA", "BBDC3.SA", "BBSE3.SA", "EGIE3.SA", "ENBR3.SA", "EZTC3.SA", "GRND3.SA", "ITSA3.SA", "ITUB3.SA", "LEVE3.SA", "LREN3.SA", "MDIA3.SA", "ODPV3.SA", "PSSA3.SA", "RADL3.SA", "SLCE3.SA", "TOTS3.SA", "VIVT3.SA", "VULC3.SA", "WEGE3.SA"]
+    # lista_de_acoes = ["ABEV3.SA", "ARZZ3.SA", "B3SA3.SA", "BBDC3.SA", "BBSE3.SA", "EGIE3.SA", "ENBR3.SA", "EZTC3.SA", "GRND3.SA", "ITSA3.SA", "ITUB3.SA", "LEVE3.SA", "LREN3.SA", "MDIA3.SA", "ODPV3.SA", "PSSA3.SA", "RADL3.SA", "SLCE3.SA", "TOTS3.SA", "VIVT3.SA", "VULC3.SA", "WEGE3.SA"]
+
+    lista_de_acoes = ["ABEV3.SA", "ARZZ3.SA", "B3SA3.SA", "BBDC3.SA"]
     
     # meu_tradedobem(lista_de_acoes)
     ia_tradedobem(lista_de_acoes)
