@@ -9,11 +9,14 @@ IA project to choose the best stock to buy on a list of selected stocks.
 # criar uma análise com base em inteligência artificial
 # comprar as duas análises e escolher a melhor
 
-from cmath import nan
 import pandas as pd
 import pandas_datareader.data as web
 from datetime import date, timedelta
 import matplotlib.pyplot as plt
+from sklearn.dummy import DummyClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 def meu_tradedobem (lista_de_acoes):
     
@@ -64,6 +67,16 @@ def fazer_df (acao, data, decisao):
         df["Decisao"] = decisao
     return df
 
+# função para avaliar um modelo de classificação
+def avaliar(y_teste, previsoes, nome_modelo):
+    print(nome_modelo)
+    report = classification_report(y_teste, previsoes)
+    print(report)
+    cf_matrix = pd.DataFrame(confusion_matrix(y_teste, previsoes), index=["Nao Comprar", "Comprar"], columns=["Nao Comprar", "Comprar"])
+    sns.heatmap(cf_matrix, annot=True, cmap="Blues", fmt=',')
+    plt.show()
+    print("#" * 50)
+
 
 def ia_tradedobem (lista_de_acoes):
     # criar uma lista de ações com minhas últimas ações compradas para trade com ação e data da compra
@@ -90,11 +103,25 @@ def ia_tradedobem (lista_de_acoes):
             if acoes != acao:
                 df = fazer_df(acoes, data_compra, 0) # decisao 0 = não compra
                 df_todos = df_todos.append(df)
-        print(df_todos)
 
     #tratar df_todos
     df_todos = df_todos.dropna("columns")
+    df_todos = df_todos.reset_index(drop=True)
+    print(df_todos)
     df_todos.to_excel("dados.xlsx",sheet_name="dados", index=False)
+
+    # separação dos dados em treino e teste
+    from sklearn.model_selection import train_test_split
+    x = df_todos.drop("Decisao", axis=1)
+    y = df_todos["Decisao"]
+    x_treino, x_teste, y_treino, y_teste = train_test_split(x, y, test_size=0.2, random_state=42)
+
+    # criar um modelo dummy
+
+    modelo_dummy = DummyClassifier(strategy="stratified")
+    modelo_dummy.fit(x_treino, y_treino)
+    previsao_dummy = modelo_dummy.predict(x_teste)
+    avaliar(y_teste, previsao_dummy, "Dummy")    
 
 
 
