@@ -144,10 +144,6 @@ def ia_tradedobem (lista_de_acoes):
 
     print("\n\nINICIO IA TRADE...") # , end="")
 
-    # ESTÁ DANDO ERRO NA EXECUÇÃO APÓS COMENTAR AS LINHAS ACIMA
-    # EXECUTAR COM TODAS AS AÇÕES PRA GRAVAR O ARQUIVO "dados.xlsx" COM TODOS OS TRADES
-    # APÓS SO LER O ARQUIVO TRADE E NAO LER NO YAHOO FINANCE
-
     # gerar_arquivo_dados("trades.xlsx")
     df_todos = pd.DataFrame()
     df_todos = pd.read_excel("dados.xlsx",sheet_name="dados")
@@ -157,26 +153,20 @@ def ia_tradedobem (lista_de_acoes):
     # correlacoes(df_todos)
 
     # treinar uma arvore de decisao e pegar as caracteristicas mais importantes dela
-
     modelo = ExtraTreesClassifier(random_state=1)
     x = df_todos.drop("Decisao", axis=1)
     y = df_todos["Decisao"]
     modelo.fit(x, y)
 
     caracteristicas_importantes = pd.DataFrame(modelo.feature_importances_, x.columns).sort_values(by=0, ascending=False)
-    # print(caracteristicas_importantes)
     top10 = list(caracteristicas_importantes.index)[:10]
-    # print(top10)
-   
-
 
     nova_base_dados = ajustar_scaler(df_todos)
     top10.append("Decisao") 
 
-    nova_base_dados = nova_base_dados[top10].reset_index(drop=True)
-    # print(nova_base_dados)
+    # nova_base_dados = nova_base_dados[top10].reset_index(drop=True)
    
-    df_todos = nova_base_dados
+    df_todos = nova_base_dados.copy()
 
     # separação dos dados em treino e teste
     x = df_todos.drop("Decisao", axis=1)
@@ -211,8 +201,6 @@ def ia_tradedobem (lista_de_acoes):
         modelos[nome_modelo] = modelo
 
     # treinamento do modelo com o tuning
-    modelo_final = modelos["RandomForest"] # melhor modelo para o tuning
-
     n_estimators = range(10, 251, 30)
     max_features = list(range(2, 11, 2))
     max_features.append('auto')
@@ -244,18 +232,13 @@ def ia_tradedobem (lista_de_acoes):
         df = fazer_df(acao, hoje, 0) 
         df_atual = df_atual.append(df)
     df_atual = df_atual.dropna("columns")
-    # df_atual = df_atual.drop("Decisao", axis=1)
-    # print(f"\n\ncolunas 1 drop: {df_atual.columns} e top10: {top10}")
-    df_atual = df_atual[top10].reset_index(drop=True)
-    # print(f"\n\ncolunas 2 drop: {df_atual.columns} e top10: {top10}")
+    # df_atual = df_atual[top10].reset_index(drop=True)
+    df_atual = df_atual[df_todos.columns].reset_index(drop=True)
     ajustar_scaler(df_atual)
-    # print(f"\n\ncolunas scaler: {df_atual.columns} e top10: {top10}")
     df_atual = df_atual.drop("Decisao", axis=1)
-    # print(df_atual)
-    # return
-
     previsao_atual = modelo_tunado.predict(df_atual)
-    print("\n\nPREVISÃO ATUAL ({hoje}):")
+    print(f"\n\nPrevisão para hoje: {previsao_atual}")
+    print(f"\n\nPREVISÃO ATUAL ({hoje}):")
     for i, acao in enumerate(lista_de_acoes):
         if previsao_atual[i] == 1:
             print(acao)
@@ -267,5 +250,5 @@ if __name__ == "__main__":
 
     # lista_de_acoes = ["ABEV3.SA", "ARZZ3.SA", "B3SA3.SA", "BBDC3.SA"]
     
-    # meu_tradedobem(lista_de_acoes)
+    meu_tradedobem(lista_de_acoes)
     ia_tradedobem(lista_de_acoes)
